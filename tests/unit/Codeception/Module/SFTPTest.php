@@ -20,17 +20,17 @@ class SFTPTest extends \Codeception\PHPUnit\TestCase
 
     public function _setUp()
     {
-        $this->module = new \Codeception\Module\FTP(make_container());
+        $container = \Codeception\Util\Stub::make('Codeception\Lib\ModuleContainer');
+        $this->module = new \Codeception\Module\FTP($container);
         $this->module->_setConfig($this->config);
-
-        $this->module->_before(Stub::makeEmpty('\Codeception\Test\Test'));
     }
 
-    /**
-     * Disabled Test - for travis testing, requires testing server
-     */
-    public function flow()
+    public function testFlow()
     {
+        $this->markTestSkipped('Requires SFTP server');
+
+        $this->module->_before(Stub::makeEmpty('\Codeception\Test\Test'));
+
         $this->assertEquals('/', $this->module->grabDirectory());
 
         $this->module->makeDir('TESTING');

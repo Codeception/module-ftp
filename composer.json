@@ -1,0 +1,30 @@
+{
+    "name":"codeception/module-ftp",
+    "description":"FTP module for Codeception",
+    "keywords":["codeception", "ftp"],
+    "homepage":"http://codeception.com/",
+    "type":"library",
+    "license":"MIT",
+    "authors":[
+        {
+            "name":"Michael Bodnarchuk"
+        }
+    ],
+    "minimum-stability": "RC",
+
+    "require": {
+        "php": ">=5.6.0 <8.0",
+        "codeception/codeception": "4.0.x-dev | ^4.0",
+        "codeception/module-filesystem": "dev-master | ^1.0",
+        "phpseclib/phpseclib": "^2.0.23"
+    },
+    "require-dev": {
+        "codeception/util-robohelpers": "dev-master"
+    },
+    "autoload":{
+        "classmap": ["src/"]
+    },
+    "config": {
+        "classmap-authoritative": true
+    }
+}
