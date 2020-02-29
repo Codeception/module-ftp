@@ -851,7 +851,7 @@ class FTP extends Filesystem
             $this->fail('failed to connect to ftp server');
         }
 
-        if (isset($this->config['key'])) {
+        if (!empty($this->config['key'])) {
             $keyFile = file_get_contents($this->config['key']);
 
             if (class_exists('Crypt_RSA')) {
