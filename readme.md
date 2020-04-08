@@ -1,6 +1,6 @@
 # FTP module for Codeception
 
-[![Build Status](https://travis-ci.org/Codeception/module-ftp.svg?branch=master)](https://travis-ci.org/Codeception/module-ftp)
+![Build Status](https://github.com/Codeception/module-ftp/workflows/CI/badge.svg)
 
 ## Installation
 
