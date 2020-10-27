@@ -17,9 +17,6 @@
         "codeception/module-filesystem": "^1.0",
         "phpseclib/phpseclib": "^2.0.23"
     },
-    "require-dev": {
-        "codeception/util-robohelpers": "dev-master"
-    },
     "autoload":{
         "classmap": ["src/"]
     },
