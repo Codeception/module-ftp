@@ -843,7 +843,7 @@ class FTP extends Filesystem
         } elseif (class_exists('phpseclib\Net\SFTP')) {
             $this->ftp = new \phpseclib\Net\SFTP($this->config['host'], $this->config['port'], $this->config['timeout']);
         } else {
-            throw new ModuleException('phpseclib/phpseclib library is not installed');
+            throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
         }
 
         if ($this->ftp === false) {
@@ -859,7 +859,7 @@ class FTP extends Filesystem
             } elseif (class_exists('phpseclib\Crypt\RSA')) {
                 $password = new \phpseclib\Crypt\RSA();
             } else {
-                throw new ModuleException('phpseclib/phpseclib library is not installed');
+                throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
             }
 
             $password->loadKey($keyFile);
