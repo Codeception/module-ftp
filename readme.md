@@ -11,3 +11,5 @@ composer require --dev "codeception/module-ftp"
 ## Documentation
 
 <a href="https://codeception.com/docs/modules/FTP">Module documentation</a>
+
+[Changelog](https://github.com/Codeception/module-ftp/releases)
