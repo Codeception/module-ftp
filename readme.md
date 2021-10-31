@@ -1,11 +1,17 @@
-# FTP module for Codeception
+# Codeception Module FTP
 
-![Build Status](https://github.com/Codeception/module-ftp/workflows/CI/badge.svg)
+FTP module for Codeception.
+
+
+[![Actions Status](https://github.com/Codeception/module-ftp/workflows/CI/badge.svg)](https://github.com/Codeception/module-ftp/actions)
+[![Latest Stable Version](https://poser.pugx.org/codeception/module-ftp/v/stable)](https://github.com/Codeception/module-ftp/releases)
+[![Total Downloads](https://poser.pugx.org/codeception/module-ftp/downloads)](https://packagist.org/packages/codeception/module-ftp)
+[![License](https://poser.pugx.org/codeception/module-ftp/license)](/LICENSE)
 
 ## Installation
 
 ```
-composer require --dev "codeception/module-ftp"
+composer require "codeception/module-ftp" --dev
 ```
 
 ## Documentation

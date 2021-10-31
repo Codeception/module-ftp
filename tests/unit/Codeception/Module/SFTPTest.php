@@ -1,27 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
+use Codeception\Module\FTP;
+use Codeception\PHPUnit\TestCase;
 use Codeception\Util\Stub;
 
-class SFTPTest extends \Codeception\PHPUnit\TestCase
+final class SFTPTest extends TestCase
 {
-    protected $config = array(
+    protected $config = [
         'host' => '127.0.0.1',
         'port' => 22,
         'tmp' => 'temp',
         'user' => 'user',
         'password' => 'password',
         'type' => 'sftp'
-    );
+    ];
 
-    /**
-     * @var \Codeception\Module\FTP
-     */
-    protected $module = null;
+    protected ?FTP $module = null;
 
     public function _setUp()
     {
-        $container = \Codeception\Util\Stub::make('Codeception\Lib\ModuleContainer');
-        $this->module = new \Codeception\Module\FTP($container);
+        $container = Stub::make('Codeception\Lib\ModuleContainer');
+        $this->module = new FTP($container);
         $this->module->_setConfig($this->config);
     }
 
