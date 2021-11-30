@@ -1,25 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
+use Codeception\Module\FTP;
+use Codeception\PHPUnit\TestCase;
 use Codeception\Util\Stub;
 
-class FTPTest extends \Codeception\PHPUnit\TestCase
+final class FTPTest extends TestCase
 {
-    protected $config = array(
+    protected array $config = [
         'host' => '127.0.0.1',
         'tmp' => 'temp',
         'user' => 'user',
         'password' => 'password'
-    );
+    ];
 
-    /**
-     * @var \Codeception\Module\FTP
-     */
-    protected $module = null;
+    protected ?FTP $module = null;
 
     public function _setUp()
     {
-        $container = \Codeception\Util\Stub::make('Codeception\Lib\ModuleContainer');
-        $this->module = new \Codeception\Module\FTP($container);
+        $container = Stub::make('Codeception\Lib\ModuleContainer');
+        $this->module = new FTP($container);
         $this->module->_setConfig($this->config);
     }
 
@@ -30,14 +31,14 @@ class FTPTest extends \Codeception\PHPUnit\TestCase
         $this->module->_before(Stub::makeEmpty('\Codeception\Test\Test'));
 
         // Check root directory
-        $this->assertEquals('/', $this->module->grabDirectory());
+        self::assertEquals('/', $this->module->grabDirectory());
 
         // Create directory
         $this->module->makeDir('TESTING');
         // Move to new directory
         $this->module->amInPath('TESTING');
         // Verify current directory
-        $this->assertEquals('/TESTING', $this->module->grabDirectory());
+        self::assertEquals('/TESTING', $this->module->grabDirectory());
 
         $files = $this->module->grabFileList();
         // Create files on server
@@ -48,18 +49,18 @@ class FTPTest extends \Codeception\PHPUnit\TestCase
         // Grab file list
         $files = $this->module->grabFileList();
         // Verify files are listed
-        $this->assertContains('test_ftp_123.txt', $files);
-        $this->assertContains('test_ftp_567.txt', $files);
-        $this->assertContains('test_ftp_678.txt', $files);
+        self::assertContains('test_ftp_123.txt', $files);
+        self::assertContains('test_ftp_567.txt', $files);
+        self::assertContains('test_ftp_678.txt', $files);
 
         $this->module->seeFileFound('test_ftp_123.txt');
         $this->module->dontSeeFileFound('test_ftp_321.txt');
         $this->module->seeFileFoundMatches('/^test_ftp_([0-9]{3}).txt$/');
         $this->module->dontSeeFileFoundMatches('/^test_([0-9]{3})_ftp.txt$/');
 
-        $this->assertGreaterThan(0, $this->module->grabFileCount());
-        $this->assertGreaterThan(0, $this->module->grabFileSize('test_ftp_678.txt'));
-        $this->assertGreaterThan(0, $this->module->grabFileModified('test_ftp_678.txt'));
+        self::assertGreaterThan(0, $this->module->grabFileCount());
+        self::assertGreaterThan(0, $this->module->grabFileSize('test_ftp_678.txt'));
+        self::assertGreaterThan(0, $this->module->grabFileModified('test_ftp_678.txt'));
 
         $this->module->openFile('test_ftp_567.txt');
         $this->module->deleteThisFile();
@@ -76,20 +77,20 @@ class FTPTest extends \Codeception\PHPUnit\TestCase
 
         $files = $this->module->grabFileList();
         // Verify old file is not listed
-        $this->assertNotContains('test_ftp_678.txt', $files);
+        self::assertNotContains('test_ftp_678.txt', $files);
         // Verify renamed file is listed
-        $this->assertContains('test_ftp_987.txt', $files);
+        self::assertContains('test_ftp_987.txt', $files);
 
         $this->module->deleteFile('test_ftp_123.txt');
 
         $files = $this->module->grabFileList();
         // Verify deleted file is not listed
-        $this->assertNotContains('test_ftp_123.txt', $files);
+        self::assertNotContains('test_ftp_123.txt', $files);
 
         // Move to root directory
         $this->module->amInPath('/');
 
-        $this->assertEquals('/', $this->module->grabDirectory());
+        self::assertEquals('/', $this->module->grabDirectory());
 
         $this->module->renameDir('TESTING', 'TESTING_NEW');
 
@@ -101,9 +102,9 @@ class FTPTest extends \Codeception\PHPUnit\TestCase
         $this->module->amInPath('TESTING');
         $this->module->writeToFile('test_ftp_123.txt', 'some data added here');
         $this->module->amInPath('/');
-        $this->assertGreaterThan(0, $this->module->grabFileCount('TESTING'));
+        self::assertGreaterThan(0, $this->module->grabFileCount('TESTING'));
         $this->module->cleanDir('TESTING');
-        $this->assertEquals(0, $this->module->grabFileCount('TESTING'));
+        self::assertEquals(0, $this->module->grabFileCount('TESTING'));
         $this->module->deleteDir('TESTING');
     }
 
