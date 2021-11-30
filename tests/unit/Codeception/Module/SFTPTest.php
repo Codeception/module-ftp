@@ -8,7 +8,7 @@ use Codeception\Util\Stub;
 
 final class SFTPTest extends TestCase
 {
-    protected $config = [
+    protected array $config = [
         'host' => '127.0.0.1',
         'port' => 22,
         'tmp' => 'temp',
@@ -32,11 +32,11 @@ final class SFTPTest extends TestCase
 
         $this->module->_before(Stub::makeEmpty('\Codeception\Test\Test'));
 
-        $this->assertEquals('/', $this->module->grabDirectory());
+        self::assertEquals('/', $this->module->grabDirectory());
 
         $this->module->makeDir('TESTING');
         $this->module->amInPath('TESTING');
-        $this->assertEquals('/TESTING', $this->module->grabDirectory());
+        self::assertEquals('/TESTING', $this->module->grabDirectory());
 
         $files = $this->module->grabFileList();
         $this->module->writeToFile('test_ftp_123.txt', 'some data added here');
@@ -44,18 +44,18 @@ final class SFTPTest extends TestCase
         $this->module->writeToFile('test_ftp_678.txt', 'some data added here');
 
         $files = $this->module->grabFileList();
-        $this->assertContains('test_ftp_123.txt', $files);
-        $this->assertContains('test_ftp_567.txt', $files);
-        $this->assertContains('test_ftp_678.txt', $files);
+        self::assertContains('test_ftp_123.txt', $files);
+        self::assertContains('test_ftp_567.txt', $files);
+        self::assertContains('test_ftp_678.txt', $files);
 
         $this->module->seeFileFound('test_ftp_123.txt');
         $this->module->dontSeeFileFound('test_ftp_321.txt');
         $this->module->seeFileFoundMatches('/^test_ftp_([0-9]{3}).txt$/');
         $this->module->dontSeeFileFoundMatches('/^test_([0-9]{3})_ftp.txt$/');
 
-        $this->assertGreaterThan(0, $this->module->grabFileCount());
-        $this->assertGreaterThan(0, $this->module->grabFileSize('test_ftp_678.txt'));
-        $this->assertGreaterThan(0, $this->module->grabFileModified('test_ftp_678.txt'));
+        self::assertGreaterThan(0, $this->module->grabFileCount());
+        self::assertGreaterThan(0, $this->module->grabFileSize('test_ftp_678.txt'));
+        self::assertGreaterThan(0, $this->module->grabFileModified('test_ftp_678.txt'));
 
         $this->module->openFile('test_ftp_567.txt');
         $this->module->deleteThisFile();
@@ -70,17 +70,17 @@ final class SFTPTest extends TestCase
         $this->module->renameFile('test_ftp_678.txt', 'test_ftp_987.txt');
 
         $files = $this->module->grabFileList();
-        $this->assertNotContains('test_ftp_678.txt', $files);
-        $this->assertContains('test_ftp_987.txt', $files);
+        self::assertNotContains('test_ftp_678.txt', $files);
+        self::assertContains('test_ftp_987.txt', $files);
 
         $this->module->deleteFile('test_ftp_123.txt');
 
         $files = $this->module->grabFileList();
-        $this->assertNotContains('test_ftp_123.txt', $files);
+        self::assertNotContains('test_ftp_123.txt', $files);
 
         $this->module->amInPath('/');
 
-        $this->assertEquals('/', $this->module->grabDirectory());
+        self::assertEquals('/', $this->module->grabDirectory());
 
         $this->module->renameDir('TESTING', 'TESTING_NEW');
 
@@ -91,9 +91,9 @@ final class SFTPTest extends TestCase
         $this->module->amInPath('TESTING');
         $this->module->writeToFile('test_ftp_123.txt', 'some data added here');
         $this->module->amInPath('/');
-        $this->assertGreaterThan(0, $this->module->grabFileCount('TESTING'));
+        self::assertGreaterThan(0, $this->module->grabFileCount('TESTING'));
         $this->module->cleanDir('TESTING');
-        $this->assertEquals(0, $this->module->grabFileCount('TESTING'));
+        self::assertEquals(0, $this->module->grabFileCount('TESTING'));
         $this->module->deleteDir('TESTING');
     }
 
