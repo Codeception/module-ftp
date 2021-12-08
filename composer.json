@@ -13,9 +13,9 @@
     "minimum-stability": "RC",
     "require": {
         "php": "^7.4 | ^8.0",
-        "codeception/codeception": "^4.0",
-        "codeception/module-filesystem": "^1.0",
-        "phpseclib/phpseclib": "^2.0.23"
+        "codeception/codeception": "^4.1",
+        "codeception/module-filesystem": "^2.0",
+        "phpseclib/phpseclib": "^2.0.35"
     },
     "require-dev": {
         "ext-ftp": "*"
