@@ -290,11 +290,8 @@ class FTP extends Filesystem
      * <?php
      * $I->writeToFile('composer.json', 'some data here');
      * ```
-     *
-     * @param string $filename
-     * @param mixed $contents
      */
-    public function writeToFile($filename, $contents): void
+    public function writeToFile(string $filename, string $contents): void
     {
         $this->_writeToFile($this->absolutizePath($filename), $contents);
     }
@@ -356,10 +353,8 @@ class FTP extends Filesystem
      * <?php
      * $I->deleteFile('composer.lock');
      * ```
-     *
-     * @param string $filename
      */
-    public function deleteFile($filename): void
+    public function deleteFile(string $filename): void
     {
         $this->delete($this->absolutizePath($filename));
     }
@@ -371,10 +366,8 @@ class FTP extends Filesystem
      * <?php
      * $I->deleteDir('vendor');
      * ```
-     *
-     * @param string $dirname
      */
-    public function deleteDir($dirname): void
+    public function deleteDir(string $dirname): void
     {
         $this->delete($this->absolutizePath($dirname));
     }
@@ -386,10 +379,8 @@ class FTP extends Filesystem
      * <?php
      * $I->cleanDir('logs');
      * ```
-     *
-     * @param string $dirname
      */
-    public function cleanDir($dirname): void
+    public function cleanDir(string $dirname): void
     {
         $this->clearDirectory($this->absolutizePath($dirname));
     }
@@ -464,10 +455,8 @@ class FTP extends Filesystem
      * <?php
      * $size = $I->grabFileSize('test.txt');
      * ```
-     *
-     * @return bool
      */
-    public function grabFileSize(string $filename)
+    public function grabFileSize(string $filename): int
     {
         $fileSize = $this->size($filename);
         $this->debug(sprintf('%s has a file size of %s', $filename, $fileSize));
@@ -482,7 +471,7 @@ class FTP extends Filesystem
      * $time = $I->grabFileModified('test.txt');
      * ```
      */
-    public function grabFileModified(string $filename): bool
+    public function grabFileModified(string $filename): int
     {
         $time = $this->modified($filename);
         $this->debug("{$filename} was last modified at {$time}");
@@ -539,6 +528,8 @@ class FTP extends Filesystem
 
     /**
      * Get the file listing for FTP/SFTP connection
+     *
+     * @return string[]
      */
     private function _listFiles(string $path): array
     {
@@ -602,7 +593,7 @@ class FTP extends Filesystem
 
         // Open file content to variable
         if ($this->file = file_get_contents($tmp_file)) {
-            $this->filepath = $filename;
+            $this->filePath = $filename;
         } else {
             $this->fail('failed to open tmp file');
         }
@@ -610,10 +601,8 @@ class FTP extends Filesystem
 
     /**
      * Write data to local tmp file and upload to server
-     *
-     * @param mixed $contents
      */
-    private function _writeToFile(string $filename, $contents): void
+    private function _writeToFile(string $filename, string $contents): void
     {
         // Check local tmp directory
         if (!is_dir($this->config['tmp']) || !is_writable($this->config['tmp'])) {
@@ -625,7 +614,7 @@ class FTP extends Filesystem
         file_put_contents($tmp_file, $contents);
 
         // Update variables
-        $this->filepath = $filename;
+        $this->filePath = $filename;
         $this->file = $contents;
 
         // Upload the file to server
@@ -724,17 +713,17 @@ class FTP extends Filesystem
     {
         $size = $this->isSFTP() ? (int)@$this->ftp->size($filename) : @ftp_size($this->ftp, $filename);
 
-        if ($size > 0) {
-            return $size;
+        if ($size < 0) {
+            $this->fail("couldn't get the file size for {$filename}");
         }
 
-        $this->fail("couldn't get the file size for {$filename}");
+        return $size;
     }
 
     /**
      * Return the last modified time of a given file
      */
-    private function modified(string $filename)
+    private function modified(string $filename): int
     {
         if ($this->isSFTP()) {
             $info = @$this->ftp->lstat($filename);
@@ -756,11 +745,6 @@ class FTP extends Filesystem
             $this->ftp = new \phpseclib\Net\SFTP($this->config['host'], $this->config['port'], $this->config['timeout']);
         } else {
             throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
-        }
-
-        if ($this->ftp === false) {
-            $this->ftp = null;
-            $this->fail('failed to connect to ftp server');
         }
 
         if (!empty($this->config['key'])) {
@@ -803,6 +787,6 @@ class FTP extends Filesystem
 
     protected function isSFTP(): bool
     {
-        return strtolower($this->config['type']) == 'sftp';
+        return strtolower($this->config['type']) === 'sftp';
     }
 }
