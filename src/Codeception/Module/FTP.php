@@ -99,10 +99,8 @@ class FTP extends Filesystem
 
     /**
      * Configuration options and default settings
-     *
-     * @var array
      */
-    protected $config = [
+    protected array $config = [
         'type'     => 'ftp',
         'port'     => 21,
         'timeout'  => 90,
@@ -117,16 +115,16 @@ class FTP extends Filesystem
     /**
      * Required configuration fields
      *
-     * @var array
+     * @var string[]
      */
-    protected $requiredFields = ['host'];
+    protected array $requiredFields = ['host'];
 
     // ----------- SETUP METHODS BELOW HERE -------------------------//
 
     /**
      * Setup connection and login with config settings
      */
-    public function _before(TestInterface $test)
+    public function _before(TestInterface $test): void
     {
         // Login using config settings
         $this->loginAs($this->config['user'], $this->config['password']);
@@ -135,7 +133,7 @@ class FTP extends Filesystem
     /**
      * Close the FTP connection & Clear up
      */
-    public function _after(TestInterface $test)
+    public function _after(TestInterface $test): void
     {
         $this->_closeConnection();
 
@@ -177,7 +175,7 @@ class FTP extends Filesystem
      */
     protected function absolutizePath(string $path): string
     {
-        if (strpos($path, '/') === 0) {
+        if (str_starts_with($path, '/')) {
             return $path;
         }
 
@@ -386,7 +384,7 @@ class FTP extends Filesystem
     public function grabFileList(string $path = '', bool $ignore = true): array
     {
         $absolutizePath = $this->absolutizePath($path)
-            . ($path != '' && substr($path, -1) != '/' ? DIRECTORY_SEPARATOR : '');
+            . ($path != '' && !str_ends_with($path, '/') ? DIRECTORY_SEPARATOR : '');
         $files = $this->_listFiles($absolutizePath);
 
         $display_files = [];
