@@ -165,10 +165,8 @@ class FTP extends Filesystem
 
     /**
      * Enters a directory on the ftp system - FTP root directory is used by default
-     *
-     * @param string $path
      */
-    public function amInPath($path): void
+    public function amInPath(string $path): void
     {
         $this->_changeDirectory($this->path = $this->absolutizePath($path) . ($path == '/' ? '' : DIRECTORY_SEPARATOR));
         $this->debug('Moved to ' . $this->path);
@@ -176,10 +174,8 @@ class FTP extends Filesystem
 
     /**
      * Resolve path
-     *
-     * @param string $path
      */
-    protected function absolutizePath($path): string
+    protected function absolutizePath(string $path): string
     {
         if (strpos($path, '/') === 0) {
             return $path;
@@ -198,11 +194,8 @@ class FTP extends Filesystem
      * <?php
      * $I->seeFileFound('UserModel.php','app/models');
      * ```
-     *
-     * @param string $filename
-     * @param string $path
      */
-    public function seeFileFound($filename, $path = ''): void
+    public function seeFileFound(string $filename, string $path = ''): void
     {
         $files = $this->grabFileList($path);
         $this->debug("see file: {$filename}");
@@ -233,11 +226,8 @@ class FTP extends Filesystem
 
     /**
      * Checks if file does not exist in path on the remote FTP/SFTP system
-     *
-     * @param string $filename
-     * @param string $path
      */
-    public function dontSeeFileFound($filename, $path = ''): void
+    public function dontSeeFileFound(string $filename, string $path = ''): void
     {
         $files = $this->grabFileList($path);
         $this->debug("don't see file: {$filename}");
@@ -274,10 +264,8 @@ class FTP extends Filesystem
      * $I->openFile('composer.json');
      * $I->seeInThisFile('codeception/codeception');
      * ```
-     *
-     * @param string $filename
      */
-    public function openFile($filename): void
+    public function openFile(string $filename): void
     {
         $this->_openFile($this->absolutizePath($filename));
     }
@@ -311,11 +299,8 @@ class FTP extends Filesystem
 
     /**
      * Currently not supported in this module, overwrite inherited method
-     *
-     * @param $src
-     * @param $dst
      */
-    public function copyDir($src, $dst): void
+    public function copyDir(string $src, string $dst): void
     {
         $this->fail('copyDir() currently unsupported by FTP module');
     }
