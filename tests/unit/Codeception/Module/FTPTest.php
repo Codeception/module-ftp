@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Codeception\Module\FTP;
 use Codeception\PHPUnit\TestCase;
-use Codeception\Util\Stub;
+use Codeception\Stub;
 
 final class FTPTest extends TestCase
 {
