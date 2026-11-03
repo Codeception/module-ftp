@@ -694,7 +694,7 @@ class FTP extends Filesystem
      */
     private function size(string $filename): int
     {
-        $size = $this->isSFTP() ? (int)@$this->ftp->size($filename) : @ftp_size($this->ftp, $filename);
+        $size = $this->isSFTP() ? (int)@$this->ftp->filesize($filename) : @ftp_size($this->ftp, $filename);
 
         if ($size < 0) {
             $this->fail("couldn't get the file size for {$filename}");
