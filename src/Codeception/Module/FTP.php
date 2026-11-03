@@ -602,7 +602,7 @@ class FTP extends Filesystem
 
         // Upload the file to server
         if ($this->isSFTP()) {
-            $flag = \phpseclib\Net\SFTP::SOURCE_LOCAL_FILE;
+            $flag = $this->ftp::SOURCE_LOCAL_FILE;
 
             $uploaded = @$this->ftp->put($filename, $tmp_file, $flag);
         } else {
