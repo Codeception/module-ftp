@@ -353,7 +353,7 @@ class FTP extends Filesystem
      */
     public function deleteDir(string $dirname): void
     {
-        $this->delete($this->absolutizePath($dirname));
+        $this->delete($this->absolutizePath($dirname), true);
     }
 
     /**
@@ -686,7 +686,7 @@ class FTP extends Filesystem
     private function clearDirectory(string $path): void
     {
         $this->debug("Clear directory: {$path}");
-        $this->delete($path);
+        $this->delete($path, true);
         $this->makeDirectory($path);
     }
 
