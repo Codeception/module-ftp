@@ -15,7 +15,7 @@
         "php": "^8.0",
         "codeception/codeception": "^5.0",
         "codeception/module-filesystem": "^3.0",
-        "phpseclib/phpseclib": "^2.0.35"
+        "phpseclib/phpseclib": "^2.0.35 || ^3.0.57 || ^4.0.2"
     },
     "require-dev": {
         "ext-ftp": "*"

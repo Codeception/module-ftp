@@ -9,6 +9,14 @@ jobs:
     strategy:
       matrix:
         php: [8.0, 8.1]
+        phpseclib: ['^2.0.35', '^3.0.57', '^4.0.2']
+        exclude:
+          - php: 8.0
+            phpseclib: '^4.0.2'
+        include:
+          # phpseclib v2 has open security advisories, which Composer blocks by default
+          - phpseclib: '^2.0.35'
+            advisories-block: '0'
 
     steps:
     - name: Checkout code
@@ -24,7 +32,11 @@ jobs:
       run: composer validate
 
     - name: Install dependencies
-      run: composer install --prefer-dist --no-progress --no-interaction --no-suggest
+      env:
+        COMPOSER_POLICY_ADVISORIES_BLOCK: ${{ matrix.advisories-block || '1' }}
+      run: |
+        composer require phpseclib/phpseclib:"${{ matrix.phpseclib }}" --no-update
+        composer update --prefer-dist --no-progress --no-interaction
 
     - name: Run test suite
       run: php vendor/bin/codecept run
