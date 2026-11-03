@@ -619,7 +619,7 @@ class FTP extends Filesystem
      */
     private function makeDirectory(string $path): void
     {
-        $created = $this->isSFTP() ? @$this->ftp->mkdir($path, true) : @ftp_mkdir($this->ftp, $path);
+        $created = $this->isSFTP() ? @$this->ftp->mkdir($path, -1, true) : @ftp_mkdir($this->ftp, $path);
 
         if (!$created) {
             $this->fail("couldn't make directory {$path}");
