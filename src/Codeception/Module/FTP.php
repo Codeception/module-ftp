@@ -93,7 +93,7 @@ class FTP extends Filesystem
 {
     /**
      * FTP/SFTP connection handler
-     * @var null|bool|\Net_SFTP|\phpseclib\Net\SFTP|resource
+     * @var null|bool|\phpseclib\Net\SFTP|resource
      */
     protected $ftp = null;
 
@@ -602,7 +602,7 @@ class FTP extends Filesystem
 
         // Upload the file to server
         if ($this->isSFTP()) {
-            $flag = defined('NET_SFTP_LOCAL_FILE') ? NET_SFTP_LOCAL_FILE : \phpseclib\Net\SFTP::SOURCE_LOCAL_FILE;
+            $flag = \phpseclib\Net\SFTP::SOURCE_LOCAL_FILE;
 
             $uploaded = @$this->ftp->put($filename, $tmp_file, $flag);
         } else {
@@ -722,9 +722,7 @@ class FTP extends Filesystem
 
     protected function sftpConnect(string $user, string $password): void
     {
-        if (class_exists('Net_SFTP')) {
-            $this->ftp = new \Net_SFTP($this->config['host'], $this->config['port'], $this->config['timeout']);
-        } elseif (class_exists(\phpseclib\Net\SFTP::class)) {
+        if (class_exists(\phpseclib\Net\SFTP::class)) {
             $this->ftp = new \phpseclib\Net\SFTP($this->config['host'], $this->config['port'], $this->config['timeout']);
         } else {
             throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
@@ -733,9 +731,7 @@ class FTP extends Filesystem
         if (!empty($this->config['key'])) {
             $keyFile = file_get_contents($this->config['key']);
 
-            if (class_exists('Crypt_RSA')) {
-                $password = new \Crypt_RSA();
-            } elseif (class_exists(\phpseclib\Crypt\RSA::class)) {
+            if (class_exists(\phpseclib\Crypt\RSA::class)) {
                 $password = new \phpseclib\Crypt\RSA();
             } else {
                 throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
