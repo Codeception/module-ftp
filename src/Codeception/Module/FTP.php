@@ -6,6 +6,9 @@ namespace Codeception\Module;
 
 use Codeception\TestInterface;
 use Codeception\Exception\ModuleException;
+use phpseclib\Net\SFTP AS SFTPv2;
+use phpseclib3\Net\SFTP AS SFTPv3;
+use phpseclib4\Net\SFTP AS SFTPv4;
 
 /**
  *
@@ -24,13 +27,11 @@ use Codeception\Exception\ModuleException;
  * * SFTP
  *
  * Connection uses php build in FTP client for FTP,
- * connection to SFTP uses [phpseclib](https://phpseclib.sourceforge.net/) pulled in using composer.
+ * connection to SFTP uses [phpseclib](https://github.com/phpseclib/phpseclib) pulled in using composer.
  *
- * For SFTP, add [phpseclib](https://phpseclib.sourceforge.net/) to require list.
+ * For SFTP, add [phpseclib](https://github.com/phpseclib/phpseclib) to require list.
  * ```
- * "require": {
- *  "phpseclib/phpseclib": "^2.0.14"
- * }
+ * composer require phpseclib/phpseclib
  * ```
  *
  * ## Status
@@ -93,7 +94,7 @@ class FTP extends Filesystem
 {
     /**
      * FTP/SFTP connection handler
-     * @var null|bool|\Net_SFTP|\phpseclib\Net\SFTP|resource
+     * @var null|bool|SFTPv2|SFTPv3|SFTPv4|resource
      */
     protected $ftp = null;
 
@@ -352,7 +353,7 @@ class FTP extends Filesystem
      */
     public function deleteDir(string $dirname): void
     {
-        $this->delete($this->absolutizePath($dirname));
+        $this->delete($this->absolutizePath($dirname), true);
     }
 
     /**
@@ -516,7 +517,7 @@ class FTP extends Filesystem
      */
     private function _listFiles(string $path): array
     {
-        $files = $this->isSFTP() ? @$this->ftp->nlist($path) : @ftp_nlist($this->ftp, $path);
+        $files = $this->isSFTP() ? $this->sftp('nlist', $path) : @ftp_nlist($this->ftp, $path);
 
         if ($files === false) {
             $this->fail("couldn't list files");
@@ -530,7 +531,7 @@ class FTP extends Filesystem
      */
     private function _directory(): string
     {
-        $pwd = $this->isSFTP() ? @$this->ftp->pwd() : @ftp_pwd($this->ftp);
+        $pwd = $this->isSFTP() ? $this->sftp('pwd') : @ftp_pwd($this->ftp);
 
         if (!$pwd) {
             $this->fail("couldn't get current directory");
@@ -544,7 +545,7 @@ class FTP extends Filesystem
      */
     private function _changeDirectory(string $path): void
     {
-        $changed = $this->isSFTP() ? @$this->ftp->chdir($path) : @ftp_chdir($this->ftp, $path);
+        $changed = $this->isSFTP() ? $this->sftp('chdir', $path) : @ftp_chdir($this->ftp, $path);
 
         if (!$changed) {
             $this->fail("couldn't change directory {$path}");
@@ -565,7 +566,7 @@ class FTP extends Filesystem
         $tmp_file = $this->config['tmp'] . "/ftp_data_file.tmp";
 
         if ($this->isSFTP()) {
-            $downloaded = @$this->ftp->get($filename, $tmp_file);
+            $downloaded = $this->sftp('get', $filename, $tmp_file);
         } else {
             $downloaded = @ftp_get($this->ftp, $tmp_file, $filename, FTP_BINARY);
         }
@@ -602,9 +603,9 @@ class FTP extends Filesystem
 
         // Upload the file to server
         if ($this->isSFTP()) {
-            $flag = defined('NET_SFTP_LOCAL_FILE') ? NET_SFTP_LOCAL_FILE : \phpseclib\Net\SFTP::SOURCE_LOCAL_FILE;
+            $flag = $this->ftp::SOURCE_LOCAL_FILE;
 
-            $uploaded = @$this->ftp->put($filename, $tmp_file, $flag);
+            $uploaded = $this->sftp('put', $filename, $tmp_file, $flag);
         } else {
             $uploaded = ftp_put($this->ftp, $filename, $tmp_file, FTP_BINARY);
         }
@@ -619,7 +620,7 @@ class FTP extends Filesystem
      */
     private function makeDirectory(string $path): void
     {
-        $created = $this->isSFTP() ? @$this->ftp->mkdir($path, true) : @ftp_mkdir($this->ftp, $path);
+        $created = $this->isSFTP() ? $this->sftp('mkdir', $path, -1, true) : @ftp_mkdir($this->ftp, $path);
 
         if (!$created) {
             $this->fail("couldn't make directory {$path}");
@@ -633,7 +634,7 @@ class FTP extends Filesystem
      */
     private function renameDirectory(string $path, string $rename): void
     {
-        $renamed = $this->isSFTP() ? @$this->ftp->rename($path, $rename) : @ftp_rename($this->ftp, $path, $rename);
+        $renamed = $this->isSFTP() ? $this->sftp('rename', $path, $rename) : @ftp_rename($this->ftp, $path, $rename);
 
         if (!$renamed) {
             $this->fail("couldn't rename directory {$path} to {$rename}");
@@ -647,7 +648,7 @@ class FTP extends Filesystem
      */
     private function delete(string $filename, bool $isDir = false): void
     {
-        $deleted = $this->isSFTP() ? @$this->ftp->delete($filename, $isDir) : @$this->ftpDelete($filename);
+        $deleted = $this->isSFTP() ? $this->sftp('delete', $filename, $isDir) : @$this->ftpDelete($filename);
 
         if (!$deleted) {
             $this->fail("couldn't delete {$filename}");
@@ -685,7 +686,7 @@ class FTP extends Filesystem
     private function clearDirectory(string $path): void
     {
         $this->debug("Clear directory: {$path}");
-        $this->delete($path);
+        $this->delete($path, true);
         $this->makeDirectory($path);
     }
 
@@ -694,7 +695,7 @@ class FTP extends Filesystem
      */
     private function size(string $filename): int
     {
-        $size = $this->isSFTP() ? (int)@$this->ftp->size($filename) : @ftp_size($this->ftp, $filename);
+        $size = $this->isSFTP() ? (int)$this->sftp('filesize', $filename) : @ftp_size($this->ftp, $filename);
 
         if ($size < 0) {
             $this->fail("couldn't get the file size for {$filename}");
@@ -709,7 +710,7 @@ class FTP extends Filesystem
     private function modified(string $filename): int
     {
         if ($this->isSFTP()) {
-            $info = @$this->ftp->lstat($filename);
+            $info = $this->sftp('lstat', $filename);
             if ($info) {
                 return $info['mtime'];
             }
@@ -722,10 +723,12 @@ class FTP extends Filesystem
 
     protected function sftpConnect(string $user, string $password): void
     {
-        if (class_exists('Net_SFTP')) {
-            $this->ftp = new \Net_SFTP($this->config['host'], $this->config['port'], $this->config['timeout']);
-        } elseif (class_exists(\phpseclib\Net\SFTP::class)) {
-            $this->ftp = new \phpseclib\Net\SFTP($this->config['host'], $this->config['port'], $this->config['timeout']);
+        if (class_exists(SFTPv4::class)) {
+            $this->ftp = new SFTPv4($this->config['host'], $this->config['port'], $this->config['timeout']);
+        } elseif (class_exists(SFTPv3::class)) {
+            $this->ftp = new SFTPv3($this->config['host'], $this->config['port'], $this->config['timeout']);
+        } elseif (class_exists(SFTPv2::class)) {
+            $this->ftp = new SFTPv2($this->config['host'], $this->config['port'], $this->config['timeout']);
         } else {
             throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
         }
@@ -733,18 +736,19 @@ class FTP extends Filesystem
         if (!empty($this->config['key'])) {
             $keyFile = file_get_contents($this->config['key']);
 
-            if (class_exists('Crypt_RSA')) {
-                $password = new \Crypt_RSA();
+            if (class_exists(\phpseclib4\Crypt\PublicKeyLoader::class)) {
+                $password = \phpseclib4\Crypt\PublicKeyLoader::load($keyFile);
+            } elseif (class_exists(\phpseclib3\Crypt\PublicKeyLoader::class)) {
+                $password = \phpseclib3\Crypt\PublicKeyLoader::load($keyFile);
             } elseif (class_exists(\phpseclib\Crypt\RSA::class)) {
                 $password = new \phpseclib\Crypt\RSA();
+                $password->loadKey($keyFile);
             } else {
                 throw new ModuleException('FTP', 'phpseclib/phpseclib library is not installed');
             }
-
-            $password->loadKey($keyFile);
         }
 
-        if (!$this->ftp->login($user, $password)) {
+        if (!$this->sftp('login', $user, $password)) {
             $this->fail('failed to authenticate user');
         }
     }
@@ -766,6 +770,25 @@ class FTP extends Filesystem
         if (isset($this->config['passive'])) {
             ftp_pasv($this->ftp, $this->config['passive']);
         }
+    }
+
+    /**
+     * Calls a method on the phpseclib SFTP connection.
+     *
+     * phpseclib v2/v3 return false on failure, v4 throws exceptions and
+     * returns void for many methods. Normalize to false on failure and
+     * true for void results.
+     */
+    private function sftp(string $method, mixed ...$args): mixed
+    {
+        try {
+            $result = @$this->ftp->{$method}(...$args);
+        } catch (\Exception $e) {
+            $this->debug("SFTP {$method}() failed: {$e->getMessage()}");
+            return false;
+        }
+
+        return $result ?? true;
     }
 
     protected function isSFTP(): bool
