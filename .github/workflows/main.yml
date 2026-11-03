@@ -6,6 +6,15 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
+    services:
+      sftp:
+        image: atmoz/sftp
+        ports:
+          - 2222:22
+        env:
+          # user:password:uid:gid:writable directory inside the chroot
+          SFTP_USERS: user:password:::upload
+
     strategy:
       matrix:
         php: [8.0, 8.1]
@@ -38,5 +47,20 @@ jobs:
         composer require phpseclib/phpseclib:"${{ matrix.phpseclib }}" --no-update
         composer update --prefer-dist --no-progress --no-interaction
 
+    - name: Wait for SFTP server
+      run: |
+        for i in $(seq 30); do
+          ssh-keyscan -p 2222 127.0.0.1 > /dev/null 2>&1 && exit 0
+          sleep 1
+        done
+        echo "SFTP server did not start" >&2
+        exit 1
+
     - name: Run test suite
+      env:
+        SFTP_HOST: 127.0.0.1
+        SFTP_PORT: 2222
+        SFTP_USER: user
+        SFTP_PASSWORD: password
+        SFTP_ROOT: /upload
       run: php vendor/bin/codecept run

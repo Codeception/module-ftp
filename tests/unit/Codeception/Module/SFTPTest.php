@@ -8,35 +8,43 @@ use Codeception\Stub;
 
 final class SFTPTest extends TestCase
 {
-    protected array $config = [
-        'host' => '127.0.0.1',
-        'port' => 22,
-        'tmp' => 'temp',
-        'user' => 'user',
-        'password' => 'password',
-        'type' => 'sftp'
-    ];
-
     protected ?FTP $module = null;
+
+    /**
+     * Writable directory on the SFTP server the test is run in
+     */
+    protected string $root = '/';
 
     public function _setUp()
     {
+        $this->root = getenv('SFTP_ROOT') ?: '/';
+
         $container = Stub::make('Codeception\Lib\ModuleContainer');
         $this->module = new FTP($container);
-        $this->module->_setConfig($this->config);
+        $this->module->_setConfig([
+            'host' => getenv('SFTP_HOST') ?: '127.0.0.1',
+            'port' => (int)(getenv('SFTP_PORT') ?: 22),
+            'tmp' => sys_get_temp_dir(),
+            'user' => getenv('SFTP_USER') ?: 'user',
+            'password' => getenv('SFTP_PASSWORD') ?: 'password',
+            'type' => 'sftp'
+        ]);
     }
 
     public function testFlow()
     {
-        $this->markTestSkipped('Requires SFTP server');
+        if (!getenv('SFTP_HOST')) {
+            $this->markTestSkipped('Requires SFTP server, set SFTP_HOST to run this test');
+        }
 
         $this->module->_before(Stub::makeEmpty('\Codeception\Test\Test'));
 
-        self::assertEquals('/', $this->module->grabDirectory());
+        $this->module->amInPath($this->root);
+        self::assertEquals($this->root, $this->module->grabDirectory());
 
         $this->module->makeDir('TESTING');
         $this->module->amInPath('TESTING');
-        self::assertEquals('/TESTING', $this->module->grabDirectory());
+        self::assertEquals(rtrim($this->root, '/') . '/TESTING', $this->module->grabDirectory());
 
         $files = $this->module->grabFileList();
         $this->module->writeToFile('test_ftp_123.txt', 'some data added here');
@@ -78,9 +86,9 @@ final class SFTPTest extends TestCase
         $files = $this->module->grabFileList();
         self::assertNotContains('test_ftp_123.txt', $files);
 
-        $this->module->amInPath('/');
+        $this->module->amInPath($this->root);
 
-        self::assertEquals('/', $this->module->grabDirectory());
+        self::assertEquals($this->root, $this->module->grabDirectory());
 
         $this->module->renameDir('TESTING', 'TESTING_NEW');
 
@@ -90,7 +98,7 @@ final class SFTPTest extends TestCase
         $this->module->makeDir('TESTING');
         $this->module->amInPath('TESTING');
         $this->module->writeToFile('test_ftp_123.txt', 'some data added here');
-        $this->module->amInPath('/');
+        $this->module->amInPath($this->root);
         self::assertGreaterThan(0, $this->module->grabFileCount('TESTING'));
         $this->module->cleanDir('TESTING');
         self::assertEquals(0, $this->module->grabFileCount('TESTING'));
