@@ -714,11 +714,11 @@ class FTP extends Filesystem
             if ($info) {
                 return $info['mtime'];
             }
-        } elseif (($time = @ftp_mdtm($this->ftp, $filename)) !== 0) {
+        } elseif (($time = @ftp_mdtm($this->ftp, $filename)) !== -1) {
             return $time;
         }
 
-        $this->fail("couldn't get the file size for {$filename}");
+        $this->fail("couldn't get the last modified time for {$filename}");
     }
 
     protected function sftpConnect(string $user, string $password): void
